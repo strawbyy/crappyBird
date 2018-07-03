@@ -6,11 +6,12 @@
 #include <vector>
 
 void menu();
+void space();
 bool gameOver;
-char map[120][25];
-int mapWidth = 120;
+char map[122][25];
+int mapWidth = 122;
 int mapHeight = 25;
-int score;
+int score = -1;
 
 class bird {
 public:
@@ -18,6 +19,7 @@ public:
 		birdY -= 4;
 		birdX+=2;
 		tailShape = '-';
+		bodyShape = 'O';
 	}
 	void place() {
 		int birdX = mapWidth - (mapWidth * 0.85);
@@ -28,6 +30,7 @@ public:
 	bool fell = false;
 	const char birdShape = '<';
 	char tailShape = '_';
+	char bodyShape = 'o';
 };
 
 class enemyBird {
@@ -36,11 +39,12 @@ public:
 	int speed = 7;
 	void place() {
 		evilBirdX = mapWidth - 4;
-		evilBirdY = (mapHeight - (mapHeight * static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 1))-1);
+		evilBirdY = ((mapHeight-5) - (mapHeight * static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 1))-1);
 		exists = true;
 	}
 	void move() {
-		evilBirdX -= speed;
+		//evilBirdX -= speed;
+		evilBirdX-=(rand()%4);
 	}
 	const char birdShape = 'X';
 	int evilBirdX;
@@ -72,13 +76,15 @@ void draw() {
 		for (int mapX = 0; mapX < 120; mapX++) {
 			if (flappyBird.birdX == mapX && flappyBird.birdY == mapY) {
 				map[mapX][mapY] = flappyBird.tailShape;
-				map[mapX + 1][mapY] = 'o';
+				map[mapX + 1][mapY] = flappyBird.bodyShape;
 				map[mapX + 2][mapY] = flappyBird.birdShape;
 			}
 			for (int enemyNumber = 0; enemyNumber < enemies.size(); enemyNumber++) {
-				if (enemies[enemyNumber].evilBirdX == mapX && enemies[enemyNumber].evilBirdY == mapY) {
-					map[mapX][mapY] = enemies[enemyNumber].birdShape;
-				}
+					if (enemies[enemyNumber].evilBirdX == mapX && enemies[enemyNumber].evilBirdY == mapY && enemyNumber < enemies.size()) {
+						if (mapX < 120 && mapY < 25) {
+							map[mapX][mapY] = enemies[enemyNumber].birdShape;
+						}
+					}
 			}
 			std::cout << map[mapX][mapY];
 		}
@@ -87,7 +93,7 @@ void draw() {
 	std::cout << "score: " << score;
 	/*debug
 	for (int i = 0; i < enemies.size(); i++) {
-		std::cout << "(" << enemies[i].evilBirdX << ", " << enemies[i].evilBirdY << ") - ";
+		std::cout << "\n(" << enemies[i].evilBirdX << ", " << enemies[i].evilBirdY << ") - ";
 	}*/
 
 }
@@ -119,6 +125,7 @@ void falling() {
 		flappyBird.birdY+=2;
 		flappyBird.birdX++;
 		flappyBird.tailShape = '_';
+		flappyBird.bodyShape = 'o';
 		flappyBird.fell = true;
 	}
 	else {
@@ -127,16 +134,19 @@ void falling() {
 }
 
 void endOrRestartGame(bird& mainBird = flappyBird) {
-	if (mainBird.birdX >= mapWidth) {
+	if (mainBird.birdX >= mapWidth-1) {
 		mainBird.birdX = mapWidth - (mapWidth * 0.90);
 		mainBird.birdY = mapHeight - (mapHeight * 0.4);
+		for (int enemyNumber = 0; enemyNumber < enemies.size(); enemyNumber++) {
+			enemies[enemyNumber].place();
+		}
 		score++;
 	}
-	if (mainBird.birdY == mapHeight || mainBird.birdY == 0) {
+	if (mainBird.birdY >= mapHeight || mainBird.birdY <= 1) {
 		gameOver = true;
 	}
 	for (int enemyNumber = 0; enemyNumber < enemies.size(); enemyNumber++) {
-		if (mainBird.birdX == enemies[enemyNumber].evilBirdX && mainBird.birdY == enemies[enemyNumber].evilBirdY) {
+		if (mainBird.birdX == enemies[enemyNumber].evilBirdX && mainBird.birdY == enemies[enemyNumber].evilBirdY || mainBird.birdX-1 == enemies[enemyNumber].evilBirdX && mainBird.birdY == enemies[enemyNumber].evilBirdY || mainBird.birdX-2 == enemies[enemyNumber].evilBirdX && mainBird.birdY == enemies[enemyNumber].evilBirdY) {
 			gameOver = true;
 		}
 	}
@@ -164,10 +174,11 @@ void gameFunction() {
 		input();
 		update();
 		draw();
-		Sleep(20);
+		Sleep(2);
 		if (gameOver) {
 			system("cls");
-			std::cout << "game over :(";
+			space();
+			std::cout << "GAMEOVER\n";
 			menu();
 		}
 	}
@@ -197,9 +208,24 @@ void difficulty() {
 	}
 }
 
+void space() {
+	for (int i = 0; i < (mapWidth / 2)-3; i++) {
+		std::cout << " ";
+	}
+}
+
 void menu() {
 	enemies.resize(5);
-	std::cout << "\nMain Menu\n\n\n1:Play Game\n\n2:Difficulty\n\n3:Exit\n\n" << std::endl << "Your option: ";
+	space();
+	std::cout << "MAIN MENU\n\n\n";
+	space();
+	std::cout << "1:Play Game\n\n";
+	space();
+	std::cout << "2:Difficulty\n\n";
+	space();
+	std::cout << "3:Exit\n\n" << std::endl;
+	space();
+	std::cout << "Your option : ";
 	int choice;
 	std::cin >> choice;
 	switch (choice) {
