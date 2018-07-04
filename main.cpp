@@ -1,9 +1,9 @@
-#include <iostream>
-#include <conio.h>
-#include <ctime>
-#include <cstdlib>
-#include <windows.h>
-#include <vector>
+#include <iostream> // displaying everything
+#include <conio.h> // for getch and kbhit
+#include <ctime> // for randomeness 
+#include <cstdlib> // for screen refresh - cls/
+#include <windows.h> // sleep()
+#include <vector> // enemy vector
 
 void menu();
 void space();
@@ -30,7 +30,8 @@ public:
 	bool fell = false;
 	const char birdShape = '<';
 	char tailShape = '_';
-	char bodyShape = 'o';
+	char bodyShape = 'o'; 
+	// _o<   _o<     _o<  _o<      _o<  _o< _o< _o<   _o< _o<   _o<   _o<     _o<  
 };
 
 class enemyBird {
@@ -43,7 +44,7 @@ public:
 		exists = true;
 	}
 	void move() {
-		//evilBirdX -= speed;
+		//evilBirdX -= speed; Difficulty settings broke the game - Fix this later
 		evilBirdX-=(rand()%4);
 	}
 	const char birdShape = 'X';
@@ -99,9 +100,9 @@ void draw() {
 }
 
 void input() {
-	if (_kbhit()) {
-		if (_getch() == ' ') {
-			flappyBird.jump();
+	if (_kbhit()) { // if a key is hit
+		if (_getch() == ' ') { // check what it is, and if it's a space
+			flappyBird.jump(); // jump
 		}
 	}
 }
@@ -116,12 +117,12 @@ void spawnEnemies() {
 }
 
 void moveEnemies(enemyBird& enemyObj) {
-	if (enemyObj.exists)
+	if (enemyObj.exists) // this was a workaround because enemies spawned in the wrong places
 		enemyObj.move();
 }
 
 void falling() {
-	if (!flappyBird.fell) {
+	if (!flappyBird.fell) { // this is so that it does not fall down too quickly, alternates between falling and staying up
 		flappyBird.birdY+=2;
 		flappyBird.birdX++;
 		flappyBird.tailShape = '_';
@@ -146,15 +147,17 @@ void endOrRestartGame(bird& mainBird = flappyBird) {
 		gameOver = true;
 	}
 	for (int enemyNumber = 0; enemyNumber < enemies.size(); enemyNumber++) {
-		if (mainBird.birdX == enemies[enemyNumber].evilBirdX && mainBird.birdY == enemies[enemyNumber].evilBirdY || mainBird.birdX-1 == enemies[enemyNumber].evilBirdX && mainBird.birdY == enemies[enemyNumber].evilBirdY || mainBird.birdX-2 == enemies[enemyNumber].evilBirdX && mainBird.birdY == enemies[enemyNumber].evilBirdY) {
-			gameOver = true;
+		if (mainBird.birdX == enemies[enemyNumber].evilBirdX && mainBird.birdY == enemies[enemyNumber].evilBirdY
+			|| mainBird.birdX-1 == enemies[enemyNumber].evilBirdX && mainBird.birdY == enemies[enemyNumber].evilBirdY 
+			|| mainBird.birdX-2 == enemies[enemyNumber].evilBirdX && mainBird.birdY == enemies[enemyNumber].evilBirdY) {
+			gameOver = true; //yes, the list of conditions is messy - put it in a bool function later.
 		}
 	}
 }
 void killEnemies() {
 	for(int i = 0; i < enemies.size(); i++)
 	if (enemies[i].evilBirdX <= 1) {
-   		enemies[i].exists = false;
+   		enemies[i].exists = false; // building off the spawn workaround to kill them ^__^
 	}
 }
 
@@ -174,7 +177,7 @@ void gameFunction() {
 		input();
 		update();
 		draw();
-		Sleep(2);
+		Sleep(4);
 		if (gameOver) {
 			system("cls");
 			space();
